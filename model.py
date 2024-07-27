@@ -371,5 +371,25 @@ def ask_questions_lg(log_reg, rules, questions_with_evidence, feature_names):
 
 # Example usage
 feature_names = X.columns
-ask_questions_lg(logistic_regression, rules, english_questions_with_evidence, feature_names)
+#ask_questions_lg(logistic_regression, rules, english_questions_with_evidence, feature_names)
 
+# Save Logistic Regression model
+joblib.dump(logistic_regression, 'logistic_regression.pkl')
+
+# Save Association Rules
+joblib.dump(rules, 'rules.pkl')
+
+# Save English Questions with Evidence
+joblib.dump(english_questions_with_evidence, 'english_questions_with_evidence.pkl')
+
+# Save Feature Names
+joblib.dump(feature_names.tolist(), 'feature_names.pkl')
+
+# Save Pathologies
+joblib.dump(pathologies, 'pathologies.pkl')
+
+# Save Feature Index Mapping (in case it's needed)
+joblib.dump({name: idx for idx, name in enumerate(feature_names)}, 'feature_index.pkl')
+
+# Save Pathology to Department Mapping
+joblib.dump(pathology_to_department, 'pathology_to_department.pkl')

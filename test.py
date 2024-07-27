@@ -1,23 +1,23 @@
 import joblib
-import pandas as pd
 import numpy as np
-from model import get_department, get_question_text, ask_questions_lg
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
 
-# Load the logistic regression model
-logistic_regression_model = joblib.load('logistic_regression_model.pkl')
-
-# Load the label encoder
-label_encoder = joblib.load('label_encoder.pkl')
-
-# Load the association rules DataFrame
-rules = joblib.load('association_rules.pkl')
-
-# Load the dictionary mapping questions to evidence
-questions_with_evidence = joblib.load('questions_with_evidence.pkl')
-
-# Load the feature names
+# Load saved components
+logistic_regression = joblib.load('logistic_regression.pkl')
+rules = joblib.load('rules.pkl')
+english_questions_with_evidence = joblib.load('english_questions_with_evidence.pkl')
 feature_names = joblib.load('feature_names.pkl')
+pathologies = joblib.load('pathologies.pkl')
+feature_index = joblib.load('feature_index.pkl')
+questions_with_evidence = joblib.load('questions_with_evidence.pkl')
+label_encoder = joblib.load('label_encoder.pkl')
+pathology_to_department = joblib.load('pathology_to_department.pkl')
 
+
+
+
+# Define the ask_questions_lg function
 def ask_questions_lg(log_reg, rules, questions_with_evidence, feature_names):
     def traverse_tree(sample):
         # Convert the sample to a DataFrame with the correct feature names
@@ -97,5 +97,18 @@ def ask_questions_lg(log_reg, rules, questions_with_evidence, feature_names):
     department = get_department(result_label)
     print(f"Predicted Result: {result_label} ... You should see the {department} department.")
 
+def get_department(pathology):
+    return pathology_to_department.get(pathology, "Unknown Department")
+
+def get_question_text(feature_index, questions_with_evidence, feature_names):
+    # Create a mapping from feature name to index
+    feature_to_index = {name: idx for idx, name in enumerate(feature_names)}
+
+    # Find the question text and evidence name corresponding to the feature index
+    for question_text, evidence_name in questions_with_evidence.items():
+        if feature_to_index[evidence_name] == feature_index:
+            return question_text, evidence_name
+    return None, None
+
 # Example usage
-ask_questions_lg(logistic_regression_model, rules, questions_with_evidence, feature_names)
+ask_questions_lg(logistic_regression, rules, english_questions_with_evidence, feature_names)

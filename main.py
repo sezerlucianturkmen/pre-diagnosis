@@ -1,20 +1,31 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import joblib
 import numpy as np
 
 app = FastAPI()
-
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Allow React app running on this port
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 class AnswerRequest(BaseModel):
     answer: str
     responses: dict
 
 # Load your model and rules
-model = joblib.load('logistic_regression_model.pkl')
-rules = joblib.load('association_rules.pkl')
+logistic_regression = joblib.load('logistic_regression.pkl')
+rules = joblib.load('rules.pkl')
+english_questions_with_evidence = joblib.load('english_questions_with_evidence.pkl')
+feature_names = joblib.load('feature_names.pkl')
+pathologies = joblib.load('pathologies.pkl')
+feature_index = joblib.load('feature_index.pkl')
 questions_with_evidence = joblib.load('questions_with_evidence.pkl')
 label_encoder = joblib.load('label_encoder.pkl')
-feature_names = joblib.load('feature_names.pkl')
 
 feature_to_index = {name: idx for idx, name in enumerate(feature_names)}
 
