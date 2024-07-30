@@ -14,9 +14,6 @@ questions_with_evidence = joblib.load('questions_with_evidence.pkl')
 label_encoder = joblib.load('label_encoder.pkl')
 pathology_to_department = joblib.load('pathology_to_department.pkl')
 
-
-
-
 # Define the ask_questions_lg function
 def ask_questions_lg(log_reg, rules, questions_with_evidence, feature_names):
     def traverse_tree(sample):
@@ -75,19 +72,20 @@ def ask_questions_lg(log_reg, rules, questions_with_evidence, feature_names):
             antecedents = row['antecedents']
             consequents = row['consequents']
 
-            # Skip if any antecedent has already been asked
-            if any(feature_to_index[feat] in asked_questions for feat in antecedents):
+            # Skip if any antecedent is missing or has already been asked
+            if any(feat not in feature_to_index or feature_to_index[feat] in asked_questions for feat in antecedents):
                 continue
 
             # Ask the next antecedent question
             for feature in antecedents:
-                feature_index = feature_to_index[feature]
-                if feature_index not in asked_questions:
-                    question_text, _ = get_question_text(feature_index, questions_with_evidence, feature_names)
-                    answer = int(input(f"{question_text} (0 or 1): "))
-                    sample[feature_index] = answer
-                    asked_questions.add(feature_index)
-                    break
+                if feature in feature_to_index:
+                    feature_index = feature_to_index[feature]
+                    if feature_index not in asked_questions:
+                        question_text, _ = get_question_text(feature_index, questions_with_evidence, feature_names)
+                        answer = int(input(f"{question_text} (0 or 1): "))
+                        sample[feature_index] = answer
+                        asked_questions.add(feature_index)
+                        break
 
             # If we've asked a question, break the loop to re-evaluate
             if feature_index in asked_questions:
@@ -106,7 +104,7 @@ def get_question_text(feature_index, questions_with_evidence, feature_names):
 
     # Find the question text and evidence name corresponding to the feature index
     for question_text, evidence_name in questions_with_evidence.items():
-        if feature_to_index[evidence_name] == feature_index:
+        if evidence_name in feature_to_index and feature_to_index[evidence_name] == feature_index:
             return question_text, evidence_name
     return None, None
 
